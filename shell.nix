@@ -7,7 +7,14 @@ let
     sha256 = "0182ys095dfx02vl2a20j1hz92dx3mfgz2a6fhn31bqlp1wa8hlq";
   }) { };
 
-  poetryPackages = pkgs.mkPoetryPackages { projectDir = ./.; };
+  poetry2nix = pkgs.callPackage (pkgs.fetchFromGitHub {
+    owner = "nix-community";
+    repo = "poetry2nix";
+    rev = "f4ab52a42cc646b8b81dd0d6345be9f48c944ac9";
+    sha256 = "1c4vf2w1sm63n9jdjr1yd32r99xq164hijqcac8lr6x6b03p3j57";
+  }) { };
+
+  poetryPackages = poetry2nix.mkPoetryPackages { projectDir = ./.; };
 
   jupyter = import (builtins.fetchGit {
     url = "https://github.com/tweag/jupyterWith";
