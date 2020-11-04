@@ -14,7 +14,7 @@ let
     sha256 = "1c4vf2w1sm63n9jdjr1yd32r99xq164hijqcac8lr6x6b03p3j57";
   }) { };
 
-  poetryPackages = poetry2nix.mkPoetryPackages { projectDir = ./.; };
+  poetryPackages = (poetry2nix.mkPoetryPackages { projectDir = ./.; }).poetryPackages;
 
   jupyter = import (builtins.fetchGit {
     url = "https://github.com/tweag/jupyterWith";
