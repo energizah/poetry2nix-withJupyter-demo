@@ -1,28 +1,27 @@
 let
-  pkgs = import (builtins.fetchTarball {
-    # Descriptive name to make the store path easier to identify
-    name = "20.03";
-    url = "https://github.com/nixos/nixpkgs/archive/20.03.tar.gz";
-    # Hash obtained using `nix-prefetch-url --unpack <url>`
-    sha256 = "0182ys095dfx02vl2a20j1hz92dx3mfgz2a6fhn31bqlp1wa8hlq";
+
+  poetry2nix = import (builtins.fetchGit {
+    url = "https://github.com/nix-community/poetry2nix";
+    rev = "70c6964368406a3494d8b08c3cc37b7bc822b268";
   }) { };
 
-  poetry2nix = pkgs.callPackage (pkgs.fetchFromGitHub {
-    owner = "nix-community";
-    repo = "poetry2nix";
-    rev = "f4ab52a42cc646b8b81dd0d6345be9f48c944ac9";
-    sha256 = "1c4vf2w1sm63n9jdjr1yd32r99xq164hijqcac8lr6x6b03p3j57";
-  }) { };
   jupyter = import (builtins.fetchGit {
     url = "https://github.com/tweag/jupyterWith";
-    rev = "";
+    rev = "a377bb551e81ed5b6ccdd7b8fc98adec3a688ee4";
+
   }) { };
 
-  poetryWith = (poetry2nix.mkPoetryPackages { projectDir = ./.; });
+  poetryEnv = (poetry2nix.mkPoetryEnv { poetrylock = ./poetry.lock; });
 
   iPython = jupyter.kernels.iPythonWith {
     name = "poetry";
-    packages = p: poetryWith.poetryPackages;
+    python3 = poetryEnv;
+    packages = ps:
+      let
+        pyproject = builtins.fromTOML (builtins.readFile ./pyproject.toml);
+        depAttrs = builtins.attrNames pyproject.tool.poetry.dependencies;
+        getDep = attrName: builtins.getAttr attrName ps;
+      in builtins.map getDep depAttrs;
   };
 
   jupyterlabEnvironment = jupyter.jupyterlabWith { kernels = [ iPython ]; };
