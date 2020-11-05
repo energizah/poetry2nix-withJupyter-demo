@@ -13,17 +13,16 @@ let
     rev = "f4ab52a42cc646b8b81dd0d6345be9f48c944ac9";
     sha256 = "1c4vf2w1sm63n9jdjr1yd32r99xq164hijqcac8lr6x6b03p3j57";
   }) { };
-
-  poetryPackages = (poetry2nix.mkPoetryPackages { projectDir = ./.; }).poetryPackages;
-
   jupyter = import (builtins.fetchGit {
     url = "https://github.com/tweag/jupyterWith";
     rev = "";
   }) { };
 
+  poetryWith = (poetry2nix.mkPoetryPackages { projectDir = ./.; });
+
   iPython = jupyter.kernels.iPythonWith {
     name = "poetry";
-    packages = p: poetryPackages;
+    packages = p: poetryWith.poetryPackages;
   };
 
   jupyterlabEnvironment = jupyter.jupyterlabWith { kernels = [ iPython ]; };
